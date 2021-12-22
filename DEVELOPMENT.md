@@ -1,5 +1,7 @@
 ## Development Guide
 
+See [setup file](docs/saythanks_development.md)
+
 ### ☤ Variable Enviroments
 
 To run the project, you need to set the following environment variables:
