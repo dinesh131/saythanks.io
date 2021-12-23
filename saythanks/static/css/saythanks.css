@@ -2,8 +2,8 @@
 @font-face {
     /* HuiFont is a Japanese handwriting free font.
        http://hp.vector.co.jp/authors/VA039499/ */
-    font-family: 'Akaya Telivigala';
-    src: url('/static/fonts/akaya-telivigala-v13-latin-regular.woff2') format('woff2');
+    font-family: 'Merienda';
+    src: url('/static/fonts/merienda-v9-latin-regular.woff2') format('woff2');
     font-weight: normal;
     font-style: normal;
     
@@ -41,7 +41,7 @@ button {
 }
 
 .note {
-    font-family: 'Akaya Telivigala', 'SerendityFont', cursive!important;
+    font-family: 'Merienda', 'SerendityFont', cursive!important;
     /*font-family: 'Annie Use Your Telescope', 'HuiFont', cursive!important; */
     font-size: 2.35rem;
     white-space: pre-wrap!important;
