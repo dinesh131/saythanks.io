@@ -2,15 +2,6 @@
 
 {% block title %}Say Thank You{% endblock %}
 
-{% block extra_head %}
-
-    <style>
-        pre {
-            max-width: 600px!important;
-        }
-    </style>
-{% endblock %}
-
 {% block content %}
 
 <form action="./logout" method="POST">
@@ -81,51 +72,61 @@
   <h3>Notes of Thankfulness:</h3>
 </p>
 
-<table>
-<tr>
-<td>
-<label for= "Font Style"> Font Style : </label>
-</td>
-<td>
-<select name="Font Style" id="fontstyle" onchange="fontforinbox(this);" >
-    <option value="0">Regular</option>
-    <option value="1">Times New Roman</option>
-    <option value="2">Verdana</option>
-    <option value="3">Tahoma</option>
-    <option value="4">Georgia</option>  
-    <option value="5">Trebuchet MS</option>
- </select>
- </td>
- </tr>
- </table>
+<form action="/inbox" method="POST">
+  <input type="text" style="font-size:14px" size=28 placeholder="{{search_str}}" name="search_str">
+    <button style="font-size:10px" type="submit">Search</button>
+    <button type="submit" name="clear" value="true">Clear</button>
+</form>
 
-<table class='u-full-width' >
+<table>
   <thead>
     <tr>
-      <th>Share URL</th>
-      <th>Message</th>
-      <th>From</th>
-      <th>Archive?</th>
+      <th id="share" style="padding:5px;">Share URL</th>
+      <th id="message">Message</th>
+      <th id="from">From</th>
+      <th id="timestamp">Timestamp</th>
     </tr>
   </thead>
   <tbody>
   {% for note in notes %}
     <tr>
-      <td width='50px'><pre class='note'><strong><a class="share" href="{{ url_for('share_note', uuid=note.uuid)}}">🔗</a></strong></pre></td>
-      <td><pre class='notebodyfont' width=180>{{ note.body }}</pre></td>
-      <td width='300px'><pre class='notebodyfont'><strong>— {{ note.byline }}</strong></pre></td>
-      <td width='50px'><pre class='note'><strong><a class="share" href="{{ url_for('archive_note', uuid=note.uuid)}}">♻</a></strong></pre></td>
+      <td class="ellipsis"><a class="share" href="{{ url_for('share_note', uuid=note.uuid)}}">🔗</a></td> 
+      <td class="ellipsis"><a href="{{ url_for('share_note', uuid=note.uuid)}}"><span>{{ note.body }}</span></a></td> 
+      <td class="ellipsis"><span>— {{ note.byline }}</span></td>
+      <td class="ellipsis">{{  note.timestamp.strftime('%d-%h-%Y %H:%M:%S') }}</td>
+      <td class="ellipsis"><strong><a class="share" href="{{ url_for('archive_note', uuid=note.uuid)}}">♻</a></strong></td>
     </tr>
   {% endfor %}
-
+  {% if (page==total_pages or total_pages==0) and search_str=="Search by message body or byline" %}
     <tr>
-      <td><pre class='note'></pre></td>
-      <td><pre class='note'>Thanks for using SayThanks.io! :)</pre></td>
-      <td><pre class='note'>Kenneth Reitz & Team</pre></td>
+      <td></td>
+      <td>Thanks for using SayThanks.io! :)</td>
+      <td>Kenneth Reitz & Team</td>
+      <td></td>
+      <td></td>
     </tr>
+    {%endif%}
   </tbody>
-</table>
-
+</table><div class="pagination">
+{% if total_pages!=0 %}
+<a style="text-decoration:none;" href="{{ url_for('inbox', page=1) }}"><<</a>
+{% if page > 1 %}
+<a style="text-decoration:none;" href="{{ url_for('inbox', page=page-1) }}">Previous</a>
+{% else %}
+<span>Previous</span>
+{% endif %}
+<span> {{ page }} of {{ total_pages }}</span>
+{% if page < total_pages %}
+<a style="text-decoration:none;" href="{{ url_for('inbox', page=page+1) }}">Next</a>
+{% else %}
+<p>Next</p>
+{% endif %}
+<a style="text-decoration:none;" href="{{ url_for('inbox', page=total_pages) }}">>></a>
+{% elif search_str!="Search by message body or byline" %}
+<span> No matches found!
+{% endif %}
+</div>
+<br><br><br><br>
 <h4>Manage your Inbox:</h4>
 
 <p>Below are some rudimentary account management tools, available, to you, today, for free!</p>

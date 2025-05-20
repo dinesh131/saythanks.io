@@ -2,6 +2,11 @@
 
 {% block title %}Say Thank You{% endblock %}
 
+{% block extra_head %} 
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+     <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+{% endblock %}
+
 {% block content %}
 
 
@@ -11,6 +16,8 @@
 
 <h4>Send a <strong class="green">Thank You</strong> note to <strong>{{ user }}</strong>{{ topic }}!</h4>
 
+
+<form id="thankyou-note-form" class="form-horizontal" action="./{{ user }}/submit" method="post">
 <table>
 <tr>
 <td>
@@ -26,10 +33,17 @@
     <option value="5">Trebuchet MS</option>
  </select>
  </td>
+ <td>
+<label for= "content-type"> Content Type: </label>
+</td>
+ <td>
+ <input type="radio" name="content-type" id="option1" value="markdown" checked> Plain Text / Markdown</input><br>
+ </td>
+ <td>
+<input type="radio" name="content-type" id="option2" value="html"> HTML</input><br>
+</td>
  </tr>
  </table>
-<form class="form-horizontal" action="./{{ user }}/submit" method="post">
-
 
 <fieldset>
 
@@ -39,17 +53,17 @@
 <!-- Textarea -->
 <div class="form-group">
   <div class="col-md-4">
-    <textarea class="form-control u-full-width notebodyfont noteinput" id="body" name="body" autofocus placeholder="Dear {{ user }},&#10Thank you for..." required></textarea>
+    <div id="editor"></div>
   </div>
 </div>
 
-<h6>You have written <strong><span id=counter></span></strong> thoughtful words, so far… (shoot for 42!)</h6>
+
+<h6>You have written <strong><span id=counter>0</span></strong> thoughtful words, so far… (shoot for 42!)</h6>
 <!-- Text input-->
 <div class="form-group">
   <label class="col-md-4 control-label" for="byline">Sincerely, </label>
   <div class="col-md-4">
   <input class='notebodyfont' id="byline" class="u-full-width" name="byline" type="text" placeholder="{{ fake_name }}" class="form-control input-md">
-
   </div>
 </div>
 
@@ -64,33 +78,48 @@
 </fieldset>
 </form>
 
-{# Have body auto-grow as users type. #}
 <script>
-  $("#body").autoGrow();
-  $('#body').simplyCountable({
-  counter: '#counter',
-  countType: 'words',
-  countDirection: 'up'
-});
-
-input = document.getElementById("byline");
-
-input.addEventListener("keyup", function(event) {
-   if (event.keyCode === 13 && event.ctrlKey) {    
-    event.preventDefault();
-    document.getElementById("submit").click();
+  function wordCount(data) {
+    var pattern = /[a-zA-Z0-9_\u0392-\u03c9\u0410-\u04F9]+|[\u4E00-\u9FFF\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\uac00-\ud7af]+/g;
+    var m = data.match(pattern);
+    var count = 0;
+    if(m === null) return count;
+    for(var i = 0; i < m.length; i++) {
+      if(m[i].charCodeAt(0) >= 0x4E00) {
+        count += m[i].length;
+      } else {
+        count += 1;
+      }
+    }
+    return count;
   }
-});
-textArea = document.getElementById("body");
-textArea.addEventListener("keyup", function(event) {
-   if (event.keyCode === 39 && event.ctrlKey) {      
+  var counter = document.getElementById("counter");
+
+  var textArea = document.getElementById("editor");
+  const editor = new toastui.Editor({
+        el: textArea,
+        previewStyle: 'tab',
+        height: '500px',
+        initialValue: "Dear {{ user }},\nThank you for..."
+      });
+
+  var form = document.getElementById("thankyou-note-form");
+  form.addEventListener('submit', (event) => {
     event.preventDefault();
-    placeHolderArr = textArea.placeholder.split(',');
-    placeHolderText = `${placeHolderArr[0]},                                                                                                                                  ${placeHolderArr[1]}`;
-    textArea.innerText = placeHolderText
-    textArea.setSelectionRange(placeHolderText.length, placeHolderText.length);
-  }
-});
+    var formData = new FormData(form);
+    formData.append('body', editor.getMarkdown());
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function() {
+        window.location.href = '/thanks';
+}
+    request.open("POST", "./{{ user }}/submit");
+    request.send(formData);
+  })
+
+  editor.addHook('change', () => {
+    counter.innerText = wordCount(editor.getMarkdown());
+  })
+  
 </script>
 
 
